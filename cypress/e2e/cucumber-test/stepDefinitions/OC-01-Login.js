@@ -1,11 +1,6 @@
 import { When, Given, And, Then } from '@badeball/cypress-cucumber-preprocessor';
-import { faker } from '@faker-js/faker';
-import { login } from '@pages/Login/Login.Page';
-const firstName = faker.name.firstName();
-const lastName = faker.name.lastName();
-const email = faker.internet.email();
-const telephone = faker.phone.number();
-const password = faker.internet.password();
+const { loginData } = require('../../../fixtures/data/login');
+const { firstName, lastName, email, telephone, password, longName, newEmail } = loginData;
 
 context('OPEN CART | sign up', () => {
 	Given('the user is on the home page', () => {
@@ -24,59 +19,84 @@ context('OPEN CART | sign up', () => {
 			cy.url().should('eq', 'https://opencart.abstracta.us/index.php?route=account/register');
 		});
 		And('the user fills in all the required fields', () => {
-			login.get.inputFirstName().type(firstName);
-			login.get.inputLastName().type(lastName);
-			login.get.inputEmail().type(email);
-			login.get.inputTelephone().type(telephone);
-			login.get.inputPassword().type(password);
-			login.get.inputConfirmPassword().type(password);
-			login.get.checkBoxAcceptConditions().click();
-			login.get.inputButtonContinue().click();
+			cy.loginRegister(firstName, lastName, email, telephone, password);
 		});
 		Then('the user should be successfully registered', () => {
 			cy.url().should('contain', 'account/success');
 		});
 	});
+
 	describe('TC2: User already registered attempts registration again', () => {
 		Given('the user is on the registration section', () => {
 			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
 		});
 		When('the user fills in the registration form with existing credentials', () => {
-			login.get.inputFirstName().type(firstName);
-			login.get.inputLastName().type(lastName);
-			login.get.inputEmail().type(email);
-			login.get.inputTelephone().type(telephone);
-			login.get.inputPassword().type(password);
-			login.get.inputConfirmPassword().type(password);
-			login.get.checkBoxAcceptConditions().click();
-			login.get.inputButtonContinue().click();
+			cy.loginRegister(firstName, lastName, email, telephone, password);
 		});
 		Then('an error message should be displayed indicating the user is already registered', () => {
 			cy.get('.alert').should('contain', 'Warning: E-Mail Address is already registered!');
 		});
-		And('the registration process should not proceed', () => {
+		And('the registration process should not success', () => {
 			cy.url().should('contain', 'account/register');
 		});
 	});
+
 	describe('TC3: User attempts registration with incomplete information', () => {
 		Given('the user visits the registration section', () => {
 			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
 		});
 		When('the user fills in the registration form with incomplete information', () => {
-			login.get.inputFirstName().clear();
-			login.get.inputLastName().type(lastName);
-			login.get.inputEmail().type(email);
-			login.get.inputTelephone().type(telephone);
-			login.get.inputPassword().type(password);
-			login.get.inputConfirmPassword().type(password);
-			login.get.checkBoxAcceptConditions().click();
-			login.get.inputButtonContinue().click();
+			cy.loginRegister('', lastName, email, telephone, password);
 		});
 		Then('an error message should be displayed prompting the user to complete all necessary fields', () => {
-			cy.get('.text-danger').should('contain', 'First Name must be between 1 and 32 characters!');
+			cy.fixture('data/login/loginOpenCart.json').then(data => {
+				const messageError = data.messageError;
+				const firstNameError = messageError.firstName;
+				cy.get('.text-danger').should('contain', firstNameError);
+			});
 		});
 		And('the user should not be successfully registered', () => {
 			cy.url().should('contain', 'account/register');
 		});
 	});
+	describe('TC4: User attempts registration with invalid credentials', () => {
+		Given('the user is on the url register', () => {
+			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
+		});
+		When('the user fills in the registration form with invalid credentials', () => {
+			cy.loginRegister(longName, lastName, email, telephone, password);
+		});
+		Then('an error message should be displayed indicating the issue with the provided information', () => {
+			cy.fixture('data/login/loginOpenCart.json').then(data => {
+				const messageError = data.messageError;
+				const firstNameError = messageError.firstName;
+				cy.get('.text-danger').should('contain', firstNameError);
+			});
+		});
+		And('the registration process should not proceed', () => {
+			cy.url().should('contain', 'account/register');
+		});
+	});
+	describe('TC5: User registers from different parts of the site', () => {
+		Given('the user is on different sections of the site', () => {
+			cy.visit('https://opencart.abstracta.us/index.php?route=account/login');
+			cy.visit('https://opencart.abstracta.us/');
+			cy.visit('https://opencart.abstracta.us/index.php?route=checkout/cart');
+			cy.visit('https://opencart.abstracta.us/index.php?route=product/manufacturer');
+			cy.visit('https://opencart.abstracta.us/index.php?route=product/special');
+			cy.visit('https://opencart.abstracta.us/');
+		});
+		When('the user navigates to the registration page', () => {
+			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
+		});
+		Then('all required fields must be completed for registration', () => {
+			cy.loginRegister(firstName, lastName, newEmail, telephone, password);
+		});
+		And('the user should be able to successfully register', () => {
+			cy.url().should('contain', 'account/success');
+		});
+	});
 });
+
+import { removeLogs } from '@helper/RemoveLogs';
+removeLogs();
