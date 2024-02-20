@@ -1,0 +1,55 @@
+import { defineConfig } from 'cypress';
+import createBundler from '@bahmutov/cypress-esbuild-preprocessor';
+import { addCucumberPreprocessorPlugin } from '@badeball/cypress-cucumber-preprocessor';
+import createEsbuildPlugin from '@badeball/cypress-cucumber-preprocessor/esbuild';
+async function setupNodeEvents(on, config) {
+	// This is required for the preprocessor to be able to generate JSON reports after each run, and more,
+	await addCucumberPreprocessorPlugin(on, config);
+	on(
+		'file:preprocessor',
+		createBundler({
+			plugins: [createEsbuildPlugin(config)],
+		})
+	);
+	// Make sure to return the config object as it might have been modified by the plugin.
+	return config;
+}
+
+export default defineConfig({
+	// 1280×720 is considered to be the most suitable screen resolution for the desktop website version:
+	viewportWidth: 1920,
+	viewportHeight: 1080,
+	// Whether Cypress will watch and restart tests on test file changes:
+	watchForFileChanges: false,
+	// En Caso de hacer testing en SUT con seguridad web:
+	chromeWebSecurity: false,
+	// multi-reporters: one report.xml + mochawesome.json per file.
+	reporter: 'cypress-multi-reporters',
+	reporterOptions: {
+		configFile: 'tsconfig.json',
+	},
+	// Number of times to retry a failed test. If a number is set, tests will retry in both runMode and openMode:
+	retries: 0,
+	// Whether Cypress will record a video of the test run when running on headless:
+	video: false,
+	// E2E Testing runner
+	e2e: {
+		// Glob pattern to determine what test files to load:
+		specPattern: ['cypress/e2e/**'],
+		// Use Cypress plugins:
+		setupNodeEvents,
+		baseUrl: 'https://opencart.abstracta.us/',
+	},
+	env: {
+		AdminUser: {
+			username: 'Admin',
+			password: 'admin123',
+		},
+		endpoint: {
+			authLogin: '/auth/login',
+			dashboardIndex: '/dashboard/index',
+			addEmployeeInPim: 'https://opensource-demo.orangehrmlive.com/web/index.php/pim/addEmployee',
+			viewEmployee: 'https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewEmployeeList',
+		},
+	},
+});
