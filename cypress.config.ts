@@ -41,9 +41,9 @@ export default defineConfig({
 		baseUrl: 'https://opencart.abstracta.us/',
 	},
 	env: {
-		AdminUser: {
-			username: 'Admin',
-			password: 'admin123',
+		UserLogin: {
+			userEmail: 'marcos@hotmail.com',
+			userPassword: 'marcosmarcos',
 		},
 		endpoint: {
 			authLogin: '/auth/login',
