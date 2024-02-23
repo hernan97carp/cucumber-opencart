@@ -7,7 +7,7 @@ class Login {
 		inputPassword: () => cy.get('[name="password"]'),
 		inputConfirmPassword: () => cy.get('[name="confirm"]'),
 		checkBoxAcceptConditions: () => cy.get('[type="checkbox"]'),
-		inputButtonContinue: () => cy.get('.pull-right > .btn'),
+		inputButtonContinue: () => cy.get('[type="submit"]'),
 	};
 }
 

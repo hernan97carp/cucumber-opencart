@@ -2,22 +2,21 @@ import { When, Given, And, Then } from '@badeball/cypress-cucumber-preprocessor'
 const { loginData } = require('../../../fixtures/data/login');
 const { firstName, lastName, email, telephone, password, longName, newEmail } = loginData;
 
-context('OPEN CART | sign up', () => {
+context('OPEN CART | SIGN UP ', () => {
 	Given('the user is on the home page', () => {
 		cy.visit('https://opencart.abstracta.us/');
 	});
+	When('the user clicks on the My Account dropdown', () => {
+		cy.get('[title="My Account"]').click();
+	});
+	And('selects the "Register" option', () => {
+		cy.get('li a[href="https://opencart.abstracta.us:443/index.php?route=account/register"]').click();
+	});
+	Then('they should be redirected to the registration section', () => {
+		cy.url().should('eq', 'https://opencart.abstracta.us/index.php?route=account/register');
+	});
 
 	describe('TC1: User successfully registers on the platform', () => {
-		When('the user clicks on the My Account dropdown', () => {
-			cy.get('[title="My Account"]').click();
-		});
-
-		And('selects the "Register" option', () => {
-			cy.get('li a[href="https://opencart.abstracta.us:443/index.php?route=account/register"]').click();
-		});
-		Then('they should be redirected to the registration section', () => {
-			cy.url().should('eq', 'https://opencart.abstracta.us/index.php?route=account/register');
-		});
 		And('the user fills in all the required fields', () => {
 			cy.loginRegister(firstName, lastName, email, telephone, password);
 		});
@@ -27,9 +26,6 @@ context('OPEN CART | sign up', () => {
 	});
 
 	describe('TC2: User already registered attempts registration again', () => {
-		Given('the user is on the registration section', () => {
-			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
-		});
 		When('the user fills in the registration form with existing credentials', () => {
 			cy.loginRegister(firstName, lastName, email, telephone, password);
 		});
@@ -42,9 +38,6 @@ context('OPEN CART | sign up', () => {
 	});
 
 	describe('TC3: User attempts registration with incomplete information', () => {
-		Given('the user visits the registration section', () => {
-			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
-		});
 		When('the user fills in the registration form with incomplete information', () => {
 			cy.loginRegister('', lastName, email, telephone, password);
 		});
@@ -79,12 +72,7 @@ context('OPEN CART | sign up', () => {
 	});
 	describe('TC5: User registers from different parts of the site', () => {
 		Given('the user is on different sections of the site', () => {
-			cy.visit('https://opencart.abstracta.us/index.php?route=account/login');
-			cy.visit('https://opencart.abstracta.us/');
-			cy.visit('https://opencart.abstracta.us/index.php?route=checkout/cart');
-			cy.visit('https://opencart.abstracta.us/index.php?route=product/manufacturer');
-			cy.visit('https://opencart.abstracta.us/index.php?route=product/special');
-			cy.visit('https://opencart.abstracta.us/');
+			cy.visitDifferentSections();
 		});
 		When('the user navigates to the registration page', () => {
 			cy.visit('https://opencart.abstracta.us/index.php?route=account/register');
