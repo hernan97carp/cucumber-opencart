@@ -123,3 +123,11 @@ cy.get('.button-group button[onclick*="cart.add"]').eq(0).click(); });
     });
 
 });
+
+describe('TC2: Verify that the user can delete a product from their wishlist', () => { let text; Given('the user has added a product to their
+wishlist', () => { cy.visit('https://opencart.abstracta.us/index.php?route=product/category&path=24'); cy.get('.button-group button
+.fa.fa-heart').eq(0).click(); cy.get('#wishlist-total').click(); cy.url().should('contain',
+'https://opencart.abstracta.us/index.php?route=account/wishlist'); }); When('the user selects the delete button in their wishlist', () => {
+cy.get('[data-original-title="Remove"]').click(); }); Then('a message confirming that the item has been deleted should be displayed', () => {
+cy.get('.alert.alert-success.alert-dismissible') .invoke('text') .then(cleanText => { text = cleanText.replace(/\n\s*×$/, '').trim(); }) .then(() => {
+let newText = text.replace(/\n\s*×$/, '').trim(); expect(newText).to.eq('Success: You have modified your wish list!') }); }); });

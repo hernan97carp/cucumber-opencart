@@ -8,7 +8,6 @@ const loginData = {
 	longName: faker.name.firstName().padEnd(40, 'x'),
 	newEmail: faker.internet.email(),
 };
-
 module.exports = {
 	loginData,
 };

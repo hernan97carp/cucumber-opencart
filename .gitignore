@@ -1,14 +1,9 @@
 
 node_modules/
-
-
-
 mochawesome-report/
-
 mochawesome.json
 cucumber-json-formatter
 cucumber-json-formatter.exe
-
 Examples/
 readme.me
 
